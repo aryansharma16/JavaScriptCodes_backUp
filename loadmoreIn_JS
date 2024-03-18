@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="stratergySection">
+
+        <nav class="navigationWrapper mt-60">
+            <ul class="tabs faqtabs">
+                <li class=" active" data-rel="mastertab1">All</li>
+                <li data-rel="mastertab2">Communication</li>
+                <li data-rel="mastertab3">Finance</li>
+                <li data-rel="mastertab5">Management Strategy
+                </li>
+                <li data-rel="mastertab4">Marketing</li>
+            </ul>
+        </nav>
+
+        <div class="content-section">
+
+            <div id="mastertab1" class="content active">
+                <div class="mastersBoxWrapper flexbox" id="allBind11">
+
+
+
+                </div>
+
+            </div>
+
+            <div id="mastertab2" class="content">
+                <div class="mastersBoxWrapper flexbox">
+
+
+
+                </div>
+
+            </div>
+
+            <div id="mastertab3" class="content">
+                <div class="mastersBoxWrapper flexbox">
+
+
+
+
+
+                </div>
+            </div>
+
+            <div id="mastertab4" class="content">
+                <div class="mastersBoxWrapper flexbox">
+
+                    <div class="masterBox">
+                        <div class="masterImage">
+                            <img src="/assets/img/naveen.png" alt="">
+                            <div class="masterPlay" onclick="openPopup('ZZt98ushcr4?si=UJxHDPGlbKvxixy3');">
+                                <img src="/assets/svg/homePlayIcon.svg" alt="">
+                            </div>
+                        </div>
+                        <span class="masterName">Sarthak Ahuja</span>
+                        <span class="masterDesignation">Director, Niamh
+                            Ventures Private Limited</span>
+                        <hr class="lineSpace">
+                        <span class="masterExperience">Teaching: M&A and Corporate Restructuring</span>
+                    </div>
+
+
+
+
+
+
+                </div>
+            </div>
+
+            <div class="mt45 center">
+                <div class="gradientButton whiteHover">
+                    <button class="button iconButton" id="loadmoreMasterUG12" data-page="1"
+                        onclick="loadMoreMasterUG()">
+                        Load More
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M20.781 8.78013L13.281 16.2801C13.2114 16.3499 13.1287 16.4052 13.0376 16.4429C12.9466 16.4807 12.849 16.5001 12.7504 16.5001C12.6519 16.5001 12.5543 16.4807 12.4632 16.4429C12.3722 16.4052 12.2894 16.3499 12.2198 16.2801L4.71979 8.78013C4.57906 8.6394 4.5 8.44852 4.5 8.2495C4.5 8.05048 4.57906 7.85961 4.71979 7.71888C4.86052 7.57815 5.05139 7.49908 5.25042 7.49908C5.44944 7.49908 5.64031 7.57815 5.78104 7.71888L12.7504 14.6892L19.7198 7.71888C19.7895 7.64919 19.8722 7.59392 19.9632 7.55621C20.0543 7.51849 20.1519 7.49908 20.2504 7.49908C20.349 7.49908 20.4465 7.51849 20.5376 7.55621C20.6286 7.59392 20.7114 7.64919 20.781 7.71888C20.8507 7.78856 20.906 7.87128 20.9437 7.96233C20.9814 8.05337 21.0008 8.15096 21.0008 8.2495C21.0008 8.34805 20.9814 8.44563 20.9437 8.53667C20.906 8.62772 20.8507 8.71044 20.781 8.78013Z"
+                                fill="black"></path>
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script>
+
+var page = 1;
+var currentPage = 1;
+
+$(document).ready(function() {
+    console.log("DOM is ready!");
+    loadAndBindMastersUG(page);
+});
+
+async function loadAndBindMastersUG(page) {
+    const res22 = await fetch(`{{apiBaseURL}}/api/getMastersNewTheme?limit=10&page=${page}`);
+    const MasterUGdata = await res22.json();
+    console.log(MasterUGdata, "Data is ready!");
+const mastersArray = MasterUGdata?.masters || []; // Handle case where masters array might be null
+
+    if (mastersArray.length === 0) {
+        document.getElementById("loadmoreMasterUG12").classList.add("hide");
+        return; // Exit the function if masters array is empty
+    }
+
+    const masterDataHTML = MasterUGdata?.masters?.map(item => {
+        const masterPhotoURL = item?.photograph?.startsWith("http") ? item.photograph : "https://cdn.mastersunion.org/assets/imgV2/avatar.jpg";
+        return `
+            <div class="masterBox">
+                <div class="masterImage">
+                    <img src=${masterPhotoURL}  alt="">
+                </div>
+                <span class="masterName">${item.title ? item.title.trim() : ""} ${item.firstName ? item.firstName.trim() : ""} ${item.lastName ? item.lastName.trim() : ""}</span>
+                <span class="masterDesignation">${item.currentPosition}</span>
+                <hr class="lineSpace">
+                <span class="masterExperience">Teaching:  ${item?.teaching[0] || ""} </span>
+            </div>`;
+    }).join('');
+
+    const el = document.querySelector('#allBind11');
+    el.innerHTML += masterDataHTML; // Append new data to existing content
+}
+
+
+function loadMoreMasterUG() {
+    console.log("Load more clicked for master data");
+    currentPage++; // Increment the currentPage
+    loadAndBindMastersUG(currentPage);
+}
+
+</script>
