@@ -1,0 +1,188 @@
+<main>
+    <div class="popupContainerOuter ApplyNow" id="ApplyNowPopUpNEW">
+        <div class="popupContainer">
+            <div class="flexend">
+                <img src="/assets/svg/crossIcon.svg" class="invert-img" alt="" onclick="hideApplyNowPopUp();">
+            </div>
+            <h2 class="font-56 font-bold font-black1  letter-spacing1">Register Now</h2>
+            <div class="formContainer active" id="form1">
+                <div class="flexInput" id="formain">
+                    <div class="inputGroup">
+                        <label for="name" class="font-14 font-medium font-black1">Full Name <span
+                                class="font-red">*</span></label>
+                        <input type="text" class="inputBox font-16 font-black1 font-medium " id="nameReport"
+                            onblur="validateInputBlur('nameReport','name')">
+                        <p class="font-12 font-red font-regular warning" id="nameReportVal">Please Check the input</p>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="name" class="font-14 font-medium font-black1">Email ID <span
+                                class="font-red">*</span></label>
+                        <input type="text" class="inputBox font-16 font-black1 font-medium " id="emailReport"
+                            onblur="validateInputBlur('emailReport','email')">
+                        <p class="font-12 font-red font-regular warning" id="emailReportVal">Please Enter Valid Email
+                        </p>
+                    </div>
+                    <div class="inputGroup">
+                        <label for="name" class="font-14 font-medium font-black1">Contact Number <span
+                                class="font-red">*</span></label>
+                        <input type="text" class="inputBox font-16 font-black1 font-medium " id="numberReport"
+                            maxlength="10" onblur="validateInputBlur('numberReport','number')">
+                        <p class="font-12 font-red font-regular warning" id="numberReportVal">Please Enter Valid Number
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+            <div class="formFooter" id="submitbuttonreport">
+                <div class="gradientButton whiteHover" onclick="onButtonClickSubmitReport()">
+                    <button class="button iconButton">
+                        Submit
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M16.0208 9.41421L7.41421 18.0208L6 16.6066L14.6066 8H7.02082V6H18.0208V17H16.0208V9.41421Z"
+                                fill="white"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div id="SuccessMessage" class="hide">
+                Successfully Registered
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+   // let name = $('#nameReport').val();
+   // let email = $('#emailReport').val();
+   // let number = $('#numberReport').val();
+    function onButtonClickSubmitReport() {
+        console.log('on submit');
+
+        // Validate functions
+        const validateNumber = (number) => /^\d+$/.test(number);
+        const validateEmail = (email) => email.includes("@") && email.includes(".");
+
+        let name = $('#nameReport').val().trim();
+        let email = $('#emailReport').val().trim();
+        let number = $('#numberReport').val().trim();
+
+        // Check name validity
+        if (name === "") {
+            $('#nameReportVal').removeClass('warning');
+            return false;
+        }
+
+        // Check email validity
+        if (!validateEmail(email)) {
+            $('#emailReportVal').text("Please enter a valid email address.");
+            $('#emailReportVal').removeClass('warning');
+            return false; // Prevent form submission
+        } else {
+            $('#emailReportVal').addClass('warning');
+        }
+
+        // Check number validity
+        if (!validateNumber(number)) {
+            $('#numberReportVal').text("Please enter a valid contact number (numbers only).");
+            $('#numberReportVal').removeClass('warning');
+            return false; // Prevent form submission
+        } else {
+            $('#numberReportVal').addClass('warning');
+        }
+
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const params = Object.fromEntries(urlSearchParams.entries());
+        const utmSource = params.utm_source || 'Website';
+        const utmMedium = params.utm_medium;
+        const utmCampaign = params.utm_campaign;
+
+        let url = $(location).attr('pathname');
+        const medium = `${url} - Download Placement Report`;
+
+        let course = 'Post Graduate Programme in Technology and Business Management';
+        if (url === '/' || url === '/pgphighlight' || url === '/pgp-rise') {
+            course = 'Post Graduate Programme in Technology and Business Management';
+        } else if (url === '/ughighlight') {
+            course = 'Under Graduate Program';
+        }
+
+        let device = 'PC';
+        if (window.matchMedia("(max-width: 768px)").matches) {
+            device = "Mobile";
+        } else {
+            device = "Desktop";
+        }
+
+        // api for our Data base
+        var post_url = '{{apiBaseURL}}/api/courseRegister';
+        var request_method = 'POST'; //get form GET/POST method
+        $.ajax({
+            url: post_url,
+            type: request_method,
+            contentType: "application/json",
+            data: JSON.stringify({
+                "email": email,
+                "name": name,
+                "mobile": number,
+                "courseName": course
+            }),
+            dataType: "json",
+            success: function (result) {
+                console.log("Second api after first success")
+                const post_url = '{{apiBaseURL}}/api/leads/pushToNPF';
+                const request_method = 'POST';
+
+                $.ajax({
+                    url: post_url,
+                    type: request_method,
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        field_device_type: device,
+                        email: email,
+                        name: name,
+                        mobile: number,
+                        linkedinProfile: "",
+                        medium: utmMedium || medium,
+                        campaign: utmCampaign || null,
+                        source: utmSource,
+                        course: course,
+                        sendMail: true
+                    }),
+                    dataType: "json",
+                    success: function (result) {
+                        // hideApplyNowPopUp(); // This function needs to be defined
+                        $('#form1').addClass('hide');
+                        $('#submitbuttonreport').addClass('hide');
+                        $('#SuccessMessage').removeClass('hide');
+                        window.open("https://cdn.mastersunion.org/assets/img/newmu/placementreporet2022.pdf", "_blank");
+                    }
+                });
+            }
+        });
+    }
+
+    function validateInputBlur(fieldId, fieldName) {
+        const inputValue = $(`#${fieldId}`).val().trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const numberRegex = /^\d+$/;
+
+        if (inputValue === "") {
+            $(`#${fieldName}ReportVal`).removeClass('warning');
+        } else {
+            $(`#${fieldName}ReportVal`).addClass('warning');
+        }
+    }
+
+
+
+
+    function hideApplyNowPopUp() {
+        let applyNowPopUp = document.getElementById("ApplyNowPopUpNEW");
+        if (applyNowPopUp) {
+            applyNowPopUp.classList.remove("active")
+            // href="https://cdn.mastersunion.org/assets/img/newmu/placementreporet2022.pdf"
+        }
+    }
+
+</script>
